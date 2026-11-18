@@ -57,7 +57,7 @@ export function FavoriteButton({
         aria-pressed={fav}
         disabled={pending}
         className={cn(
-          "inline-flex h-12 cursor-pointer items-center justify-center gap-2 rounded-full border-2 px-5 text-sm font-semibold transition active:scale-[0.97]",
+          "inline-flex h-13 cursor-pointer items-center justify-center gap-2 rounded-full border-2 px-5 text-sm font-semibold transition active:scale-[0.97]",
           fav ? "border-apricot-300 bg-apricot-100 text-apricot-600" : "border-sage-200 bg-white text-sage-800 hover:border-apricot-300",
           className,
         )}

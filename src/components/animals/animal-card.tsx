@@ -9,11 +9,24 @@ import { cn } from "@/lib/utils";
 import type { AnimalCardData } from "@/lib/data/animals";
 import { FavoriteButton } from "./favorite-button";
 
-type CardAnimal = Pick<
-  AnimalCardData,
-  "id" | "slug" | "name" | "species" | "breed" | "age_group" | "sex" | "size" | "city_name" | "uf" |
-  "image_path" | "status" | "special_needs" | "owner_verified"
-> & { distance_km?: number | null; species_other?: string | null };
+export type CardAnimal = {
+  id: string;
+  slug: string;
+  name: string;
+  species: AnimalCardData["species"];
+  species_other?: string | null;
+  breed: string | null;
+  age_group: AnimalCardData["age_group"];
+  sex: AnimalCardData["sex"];
+  size: AnimalCardData["size"];
+  city_name: string;
+  uf: string;
+  image_path: string | null;
+  status: AnimalCardData["status"];
+  special_needs: boolean;
+  owner_verified?: boolean | null;
+  distance_km?: number | null;
+};
 
 export function AnimalCard({
   animal,

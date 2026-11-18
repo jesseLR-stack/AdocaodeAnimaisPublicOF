@@ -36,12 +36,15 @@ export function CityPicker({
 }) {
   const [uf, setUf] = useState(defaultUf);
   const [cityId, setCityId] = useState<string>(defaultCityId ? String(defaultCityId) : "");
-  const [cities, setCities] = useState<City[]>(() => cache.get(defaultUf) ?? []);
-  const [loading, setLoading] = useState(false);
+  const [loaded, setLoaded] = useState<Record<string, City[]>>(() => Object.fromEntries(cache));
+  const cities = uf ? loaded[uf] ?? [] : [];
+  const loading = Boolean(uf) && !loaded[uf];
   const ufRef = useRef<HTMLSelectElement>(null);
   const cityRef = useRef<HTMLSelectElement>(null);
   const latest = useRef({ uf, cityId });
-  latest.current = { uf, cityId };
+  useEffect(() => {
+    latest.current = { uf, cityId };
+  }, [uf, cityId]);
 
   // React 19 redefine formulários após uma Server Action; restauramos a seleção atual.
   useEffect(() => {
@@ -57,28 +60,19 @@ export function CityPicker({
   }, []);
 
   useEffect(() => {
-    if (!uf) {
-      setCities([]);
-      return;
-    }
-    if (cache.has(uf)) {
-      setCities(cache.get(uf)!);
-      return;
-    }
+    if (!uf || loaded[uf]) return;
     let active = true;
-    setLoading(true);
     createClient()
       .from("cities").select("id, name").eq("uf", uf).order("name")
       .then(({ data }) => {
         if (!active) return;
         cache.set(uf, data ?? []);
-        setCities(data ?? []);
-        setLoading(false);
+        setLoaded((prev) => ({ ...prev, [uf]: data ?? [] }));
       });
     return () => {
       active = false;
     };
-  }, [uf]);
+  }, [uf, loaded]);
 
   return (
     <div className={cn("grid gap-3", compact ? "grid-cols-[96px_1fr]" : "sm:grid-cols-[160px_1fr]", className)}>

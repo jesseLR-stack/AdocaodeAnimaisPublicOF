@@ -10,8 +10,12 @@ import { cn } from "@/lib/utils";
 /** Sino de notificações com atualização em tempo real (Supabase Realtime). */
 export function NotificationBell({ userId, initialCount }: { userId: string; initialCount: number }) {
   const [count, setCount] = useState(initialCount);
-
-  useEffect(() => setCount(initialCount), [initialCount]);
+  const [prevInitial, setPrevInitial] = useState(initialCount);
+  if (initialCount !== prevInitial) {
+    // Ajuste durante a renderização quando o servidor envia um novo total.
+    setPrevInitial(initialCount);
+    setCount(initialCount);
+  }
 
   useEffect(() => {
     const supabase = createClient();

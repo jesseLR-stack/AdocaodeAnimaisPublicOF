@@ -5,7 +5,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { useRouter } from "next/navigation";
 import { AlertTriangle, ArrowLeft, Ban, Flag, Loader2, MoreVertical, SendHorizontal, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client";
+import { authenticateRealtime, createClient } from "@/lib/supabase/client";
 import { setBlocked } from "@/app/actions/chat";
 import { ReportDialog } from "@/components/animals/report-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -40,6 +40,7 @@ export function ChatThread({
   const [sending, setSending] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [blocked, setBlockedState] = useState(blockedByMe);
+  const [live, setLive] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
 
@@ -49,20 +50,26 @@ export function ChatThread({
 
   useEffect(() => {
     markRead();
-    const channel = supabase
-      .channel(`conversation:${conversationId}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${conversationId}` },
-        (payload) => {
-          const m = payload.new as ChatMessage;
-          setMessages((prev) => (prev.some((p) => p.id === m.id) ? prev : [...prev, m]));
-          if (m.sender_id !== me) markRead();
-        },
-      )
-      .subscribe();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let cancelled = false;
+    authenticateRealtime().then(() => {
+      if (cancelled) return;
+      channel = supabase
+        .channel(`conversation:${conversationId}`)
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${conversationId}` },
+          (payload) => {
+            const m = payload.new as ChatMessage;
+            setMessages((prev) => (prev.some((p) => p.id === m.id) ? prev : [...prev, m]));
+            if (m.sender_id !== me) markRead();
+          },
+        )
+        .subscribe((status) => setLive(status === "SUBSCRIBED"));
+    });
     return () => {
-      supabase.removeChannel(channel);
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
     };
   }, [supabase, conversationId, me, markRead]);
 
@@ -147,6 +154,9 @@ export function ChatThread({
           ) : <p className="truncate font-semibold text-sage-900">{other.name}</p>}
           {animal && <Link href={`/animais/${animal.slug}`} className="block truncate text-xs font-semibold text-apricot-600 hover:underline">sobre {animal.name}</Link>}
         </div>
+        <span data-realtime={live ? "on" : "off"} className="hidden items-center gap-1.5 text-xs text-muted-foreground sm:flex" title={live ? "Mensagens chegam em tempo real" : "Conectando…"}>
+          <span className={cn("size-2 rounded-full", live ? "bg-emerald-500" : "bg-beige-400")} /> {live ? "ao vivo" : "conectando"}
+        </span>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" aria-label="Opções da conversa"><MoreVertical className="size-5" /></Button>

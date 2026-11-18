@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
 import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client";
+import { authenticateRealtime } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 /** Sino de notificações com atualização em tempo real (Supabase Realtime). */
@@ -18,21 +18,27 @@ export function NotificationBell({ userId, initialCount }: { userId: string; ini
   }
 
   useEffect(() => {
-    const supabase = createClient();
-    const channel = supabase
-      .channel(`notifications:${userId}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
-        (payload) => {
-          setCount((c) => c + 1);
-          const n = payload.new as { title: string; body: string | null };
-          toast(n.title, { description: n.body ?? undefined });
-        },
-      )
-      .subscribe();
+    let cleanup = () => {};
+    let cancelled = false;
+    authenticateRealtime().then((supabase) => {
+      if (cancelled) return;
+      const channel = supabase
+        .channel(`notifications:${userId}`)
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
+          (payload) => {
+            setCount((c) => c + 1);
+            const n = payload.new as { title: string; body: string | null };
+            toast(n.title, { description: n.body ?? undefined });
+          },
+        )
+        .subscribe();
+      cleanup = () => supabase.removeChannel(channel);
+    });
     return () => {
-      supabase.removeChannel(channel);
+      cancelled = true;
+      cleanup();
     };
   }, [userId]);
 

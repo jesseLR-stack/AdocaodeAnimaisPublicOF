@@ -11,3 +11,14 @@ export function createClient() {
   browserClient ??= createBrowserClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
   return browserClient;
 }
+
+/**
+ * Garante que o Realtime use o token do usuário logado (necessário para que o RLS
+ * libere os eventos de mensagens e notificações) antes de assinar um canal.
+ */
+export async function authenticateRealtime() {
+  const supabase = createClient();
+  const { data } = await supabase.auth.getSession();
+  if (data.session?.access_token) await supabase.realtime.setAuth(data.session.access_token);
+  return supabase;
+}

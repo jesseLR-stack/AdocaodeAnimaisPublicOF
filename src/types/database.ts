@@ -613,6 +613,12 @@ isOneToOne: false
 "admin_dashboard_stats":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
+"admin_flag_inappropriate":
+{ Args: { "p_animal": string,"p_reason": string }; Returns: undefined
+                           },
+"admin_mark_contact_handled":
+{ Args: { "p_id": string }; Returns: undefined
+                           },
 "admin_set_animal_status":
 { Args: { "p_animal": string,"p_reason": string,"p_status": Database["public"]['Enums']["animal_status"] }; Returns: undefined
                            },
@@ -624,6 +630,9 @@ isOneToOne: false
                            },
 "admin_set_user_status":
 { Args: { "p_reason": string,"p_status": Database["public"]['Enums']["account_status"],"p_user": string }; Returns: undefined
+                           },
+"admin_update_animal":
+{ Args: { "p_animal": string,"p_description": string,"p_name": string,"p_reason": string }; Returns: undefined
                            },
 "admin_update_report":
 { Args: { "p_note": string,"p_report": string,"p_status": Database["public"]['Enums']["report_status"] }; Returns: undefined

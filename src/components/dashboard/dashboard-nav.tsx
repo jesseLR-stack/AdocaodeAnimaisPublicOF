@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 import {
   Bell, Heart, Inbox, LayoutDashboard, MessageCircle, PawPrint, PlusCircle, Send, Settings, ShieldCheck, User,
 } from "lucide-react";
@@ -24,6 +25,10 @@ export function DashboardNav({
   counts, isStaff,
 }: { counts: { interests: number; messages: number; notifications: number }; isStaff: boolean }) {
   const pathname = usePathname();
+  const mobileNav = useRef<HTMLElement>(null);
+  useEffect(() => {
+    mobileNav.current?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [pathname]);
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname === href || (pathname.startsWith(`${href}/`) && !(href === "/painel/anuncios" && pathname === "/painel/anuncios/novo"));
 
@@ -55,7 +60,7 @@ export function DashboardNav({
 
   return (
     <>
-      <nav aria-label="Painel" className="-mx-4 mb-6 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-none lg:hidden">
+      <nav ref={mobileNav} aria-label="Painel" className="-mx-4 mb-6 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-none lg:hidden">
         {ITEMS.map((i) => link(i, true))}
       </nav>
       <nav aria-label="Painel" className="hidden flex-col gap-1 lg:flex">

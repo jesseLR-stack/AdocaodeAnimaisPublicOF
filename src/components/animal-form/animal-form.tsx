@@ -184,9 +184,8 @@ export function AnimalForm({ userId, initial, mode }: { userId: string; initial:
     if (!accept) return toast.error("Aceite as diretrizes para publicar.");
     for (let i = 0; i < STEPS.length - 1; i++) if (!validate(i)) return setStep(i);
     start(async () => {
-      const { uf: _uf, ...rest } = values;
       const payload = {
-        ...rest,
+        id: values.id, basic: values.basic, details: values.details, location: values.location, contact: values.contact,
         photos: { primary: values.photos.primary, images: values.photos.images.map(({ id, path, width, height }) => ({ id, path, width, height })) },
         accept_guidelines: true as const,
       };

@@ -32,7 +32,7 @@ export async function sendContact(_: ContactState, formData: FormData): Promise<
     .eq("ip_hash", ipHash).gte("created_at", since);
   if ((count ?? 0) >= 3) return { error: "Você enviou muitas mensagens. Tente novamente em uma hora." };
 
-  const { website: _hp, ...data } = parsed.data;
+  const data = { name: parsed.data.name, email: parsed.data.email, subject: parsed.data.subject, message: parsed.data.message };
   const { error } = await admin.from("contact_messages").insert({
     ...data, ip_hash: ipHash, user_id: (claims?.claims?.sub as string | undefined) ?? null,
   });

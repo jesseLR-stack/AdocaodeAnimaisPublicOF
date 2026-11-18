@@ -104,16 +104,16 @@ test.describe("usuário logado", () => {
     await adopter.waitForURL(/\/painel\/conversas\/[0-9a-f-]{36}/);
     const url = adopter.url();
     await owner.goto(url.replace(/^https?:\/\/[^/]+/, ""));
-    await expect(owner.getByText("Posso visitar no sábado?")).toBeVisible();
+    await expect(owner.getByLabel("Mensagens").getByText("Posso visitar no sábado?")).toBeVisible();
     await expect(owner.locator('[data-realtime="on"]')).toBeAttached({ timeout: 15_000 });
     await expect(adopter.locator('[data-realtime="on"]')).toBeAttached({ timeout: 15_000 });
 
     const text = `Mensagem de teste ${Date.now()}`;
     await adopter.fill("#chat-input", text);
     await adopter.keyboard.press("Enter");
-    await expect(adopter.getByText(text)).toBeVisible();
+    await expect(adopter.getByLabel("Mensagens").getByText(text)).toBeVisible();
     // A outra pessoa recebe sem recarregar a página (Supabase Realtime).
-    await expect(owner.getByText(text)).toBeVisible({ timeout: 15_000 });
+    await expect(owner.getByLabel("Mensagens").getByText(text)).toBeVisible({ timeout: 15_000 });
 
     await owner.fill("#chat-input", "Pode sim! Venha às 10h. Faça o PIX da taxa antes.");
     await owner.keyboard.press("Enter");

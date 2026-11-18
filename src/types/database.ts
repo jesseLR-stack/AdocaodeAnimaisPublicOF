@@ -181,6 +181,32 @@ isOneToOne: false
       referencedColumns: ["uf"]
     }
                   ]
+                },"contact_messages": {
+                  Row: {
+                    "created_at": string,"email": string,"handled_at": string | null,"handled_by": string | null,"id": string,"ip_hash": string | null,"message": string,"name": string,"subject": string,"user_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"email": string,"handled_at"?: string | null,"handled_by"?: string | null,"id"?: string,"ip_hash"?: string | null,"message": string,"name": string,"subject": string,"user_id"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"email"?: string,"handled_at"?: string | null,"handled_by"?: string | null,"id"?: string,"ip_hash"?: string | null,"message"?: string,"name"?: string,"subject"?: string,"user_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "contact_messages_handled_by_fkey"
+      columns: ["handled_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "contact_messages_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"conversation_participants": {
                   Row: {
                     "conversation_id": string,"joined_at": string,"last_read_at": string,"user_id": string
